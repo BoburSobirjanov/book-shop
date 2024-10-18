@@ -16,6 +16,4 @@ public class CommentDto {
 
     private String bookId;
 
-    private String userId;
-
 }

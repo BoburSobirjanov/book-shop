@@ -16,7 +16,7 @@ public class BookResponse {
 
     private String name;
 
-    private AuthorResponse authorResponse;
+    private AuthorResponse author;
 
     private Integer pages;
 
