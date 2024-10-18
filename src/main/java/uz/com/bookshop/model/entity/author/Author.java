@@ -1,10 +1,10 @@
-package uz.com.bookshop.model.entity;
+package uz.com.bookshop.model.entity.author;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import lombok.*;
-import uz.com.bookshop.model.BaseEntity;
+import uz.com.bookshop.model.entity.BaseEntity;
 
 import java.time.LocalDate;
 

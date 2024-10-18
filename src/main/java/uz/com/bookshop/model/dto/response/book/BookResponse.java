@@ -1,7 +1,7 @@
 package uz.com.bookshop.model.dto.response.book;
 
 import lombok.*;
-import uz.com.bookshop.model.entity.Author;
+import uz.com.bookshop.model.dto.response.author.AuthorResponse;
 
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ public class BookResponse {
 
     private String name;
 
-    private Author author;
+    private AuthorResponse authorResponse;
 
     private Integer pages;
 

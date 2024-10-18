@@ -1,10 +1,11 @@
-package uz.com.bookshop.model.entity;
+package uz.com.bookshop.model.entity.book;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
-import uz.com.bookshop.model.BaseEntity;
+import uz.com.bookshop.model.entity.BaseEntity;
+import uz.com.bookshop.model.entity.author.Author;
 
 @AllArgsConstructor
 @NoArgsConstructor

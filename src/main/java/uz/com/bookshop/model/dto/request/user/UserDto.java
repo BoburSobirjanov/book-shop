@@ -1,4 +1,4 @@
-package uz.com.bookshop.model.dto.request;
+package uz.com.bookshop.model.dto.request.user;
 
 import lombok.*;
 

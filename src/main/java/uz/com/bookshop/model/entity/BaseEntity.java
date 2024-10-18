@@ -1,4 +1,4 @@
-package uz.com.bookshop.model;
+package uz.com.bookshop.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

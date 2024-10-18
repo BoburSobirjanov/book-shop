@@ -1,9 +1,10 @@
-package uz.com.bookshop.model.entity;
+package uz.com.bookshop.model.entity.price;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import lombok.*;
-import uz.com.bookshop.model.BaseEntity;
+import uz.com.bookshop.model.entity.BaseEntity;
+import uz.com.bookshop.model.entity.book.Book;
 
 
 @AllArgsConstructor
