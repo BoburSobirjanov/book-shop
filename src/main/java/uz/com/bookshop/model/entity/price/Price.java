@@ -6,6 +6,8 @@ import lombok.*;
 import uz.com.bookshop.model.entity.BaseEntity;
 import uz.com.bookshop.model.entity.book.Book;
 
+import java.util.UUID;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,4 +21,6 @@ public class Price extends BaseEntity {
 
     @OneToOne
     private Book book;
+
+    private UUID createdBy;
 }
