@@ -9,10 +9,6 @@ import lombok.*;
 @Builder
 public class UserPurchasesDto {
 
-    private String user;
-
     private String book;
-
-    private Double price;
 
 }
