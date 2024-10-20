@@ -18,8 +18,6 @@ public class UserForFront {
 
     private String fullName;
 
-    private String password;
-
     private String username;
 
     private String phoneNumber;

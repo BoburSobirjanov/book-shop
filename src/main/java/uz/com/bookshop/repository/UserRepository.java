@@ -1,5 +1,7 @@
 package uz.com.bookshop.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -17,4 +19,11 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     @Query("select u from users as u where u.isDeleted=false and u.phoneNumber=?1")
 
     Optional<UserEntity> findUserEntityByPhoneNumber(String phoneNumber);
+
+
+    @Query("select u from users as u where u.isDeleted=false and u.id=?1")
+    Optional<UserEntity> findUserEntityById(UUID id);
+
+    @Query("select u from users as u where u.isDeleted=false")
+    Page<UserEntity> findAllUsers(Pageable pageable);
 }
