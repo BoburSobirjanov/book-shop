@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.com.bookshop.model.dto.request.comment.CommentDto;
-import uz.com.bookshop.model.dto.response.comment.CommentResponse;
+import uz.com.bookshop.model.dto.response.comment.CommentResponseDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
 import uz.com.bookshop.service.comment.CommentService;
 
@@ -24,7 +24,7 @@ public class CommentController {
 
 
     @PostMapping("/save")
-    public StandardResponse<CommentResponse> save(
+    public StandardResponse<CommentResponseDto> save(
             @RequestBody CommentDto commentDto,
             Principal principal
              ){
@@ -49,7 +49,7 @@ public class CommentController {
 
 
     @GetMapping("/get-by-id/{id}")
-    public StandardResponse<CommentResponse> getById(
+    public StandardResponse<CommentResponseDto> getById(
             @PathVariable UUID id
     ){
         return commentService.getById(id);
@@ -60,7 +60,7 @@ public class CommentController {
 
 
     @GetMapping("/get-all-comments")
-    public Page<CommentResponse> getAll(
+    public Page<CommentResponseDto> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
@@ -73,7 +73,7 @@ public class CommentController {
 
 
     @PutMapping("/{id}/update")
-    public StandardResponse<CommentResponse> update(
+    public StandardResponse<CommentResponseDto> update(
             @RequestBody CommentDto commentDto,
             @PathVariable UUID id,
             Principal principal
@@ -86,7 +86,7 @@ public class CommentController {
 
     @GetMapping("/{id}/get-all-comments")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<CommentResponse> getUserComments(
+    public Page<CommentResponseDto> getUserComments(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size

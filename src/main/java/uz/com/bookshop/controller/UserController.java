@@ -8,7 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.com.bookshop.model.dto.request.user.UserDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
-import uz.com.bookshop.model.dto.response.user.UserForFront;
+import uz.com.bookshop.model.dto.response.user.UserForFrontDto;
 import uz.com.bookshop.service.user.UserService;
 
 import java.security.Principal;
@@ -27,7 +27,7 @@ public class UserController {
 
     @GetMapping("/get-by-id/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public StandardResponse<UserForFront> getById(
+    public StandardResponse<UserForFrontDto> getById(
             @PathVariable UUID id
             ){
         return userService.getById(id);
@@ -52,7 +52,7 @@ public class UserController {
 
     @GetMapping("/get-all-users")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<UserForFront> getAllUsers(
+    public Page<UserForFrontDto> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
@@ -65,7 +65,7 @@ public class UserController {
 
     @PutMapping("/{id}/assign-to-admin")
     @PreAuthorize("hasRole('ADMIN')")
-    public StandardResponse<UserForFront> assignToAdmin(
+    public StandardResponse<UserForFrontDto> assignToAdmin(
             @PathVariable UUID id
     ){
         return userService.assignToAdmin(id);
@@ -76,7 +76,7 @@ public class UserController {
 
 
     @PutMapping("/{id}/update")
-    public StandardResponse<UserForFront> update(
+    public StandardResponse<UserForFrontDto> update(
             @RequestBody UserDto userDto,
             @PathVariable UUID id
             ){

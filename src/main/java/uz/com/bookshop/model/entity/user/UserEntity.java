@@ -10,6 +10,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import uz.com.bookshop.model.entity.BaseEntity;
+import uz.com.bookshop.model.enums.Gender;
+import uz.com.bookshop.model.enums.UserRole;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

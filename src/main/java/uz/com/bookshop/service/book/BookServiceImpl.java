@@ -6,11 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uz.com.bookshop.exception.DataNotFoundException;
+import uz.com.bookshop.mapper.BookMapper;
 import uz.com.bookshop.model.dto.request.book.BookDto;
-import uz.com.bookshop.model.dto.response.author.AuthorResponse;
-import uz.com.bookshop.model.dto.response.book.BookResponse;
+import uz.com.bookshop.model.dto.response.author.AuthorResponseDto;
+import uz.com.bookshop.model.dto.response.book.BookResponseDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
-import uz.com.bookshop.model.dto.response.standard.Status;
 import uz.com.bookshop.model.entity.author.Author;
 import uz.com.bookshop.model.entity.book.Book;
 import uz.com.bookshop.model.entity.user.UserEntity;
@@ -32,12 +32,13 @@ public class BookServiceImpl implements BookService{
     private final ModelMapper modelMapper;
     private final AuthorRepository authorRepository;
     private final UserRepository userRepository;
+    private final BookMapper bookMapper;
 
 
 
 
     @Override
-    public StandardResponse<BookResponse> save(BookDto bookDto) {
+    public StandardResponse<BookResponseDto> save(BookDto bookDto) {
         Book book = modelMapper.map(bookDto,Book.class);
         book.setName(bookDto.getName());
         book.setPages(bookDto.getPages());
@@ -50,13 +51,9 @@ public class BookServiceImpl implements BookService{
         book.setAuthor(author.get());
         Book save = bookRepository.save(book);
 
-        BookResponse bookResponse = modelMapper.map(save,BookResponse.class);
+        BookResponseDto bookResponseDto = modelMapper.map(save, BookResponseDto.class);
 
-        return StandardResponse.<BookResponse>builder()
-                .status(Status.SUCCESS)
-                .message("Book added!")
-                .data(bookResponse)
-                .build();
+        return StandardResponse.ok("Book added!",bookResponseDto);
     }
 
 
@@ -79,11 +76,7 @@ public class BookServiceImpl implements BookService{
         book.get().setDeletedBy(user.get().getId());
         bookRepository.save(book.get());
 
-        return StandardResponse.<String>builder()
-                .status(Status.SUCCESS)
-                .message("Book deleted!")
-                .data("DELETED")
-                .build();
+        return StandardResponse.ok("Book deleted!","DELETED");
     }
 
 
@@ -93,17 +86,13 @@ public class BookServiceImpl implements BookService{
 
 
     @Override
-    public StandardResponse<BookResponse> getById(UUID id) {
+    public StandardResponse<BookResponseDto> getById(UUID id) {
         Optional<Book> book = bookRepository.findBookById(id);
         if (book.isEmpty()){
             throw new DataNotFoundException("Book not found!");
         }
-        BookResponse bookResponse = modelMapper.map(book.get(), BookResponse.class);
-        return StandardResponse.<BookResponse>builder()
-                .status(Status.SUCCESS)
-                .message("This is book")
-                .data(bookResponse)
-                .build();
+        BookResponseDto bookResponseDto = modelMapper.map(book.get(), BookResponseDto.class);
+        return StandardResponse.ok("This is book",bookResponseDto);
     }
 
 
@@ -114,12 +103,14 @@ public class BookServiceImpl implements BookService{
 
 
     @Override
-    public Page<BookResponse> getAllBooks(Pageable pageable) {
+    public Page<BookResponseDto> getAllBooks(Pageable pageable) {
         Page<Book> books = bookRepository.findAllBooks(pageable);
 
-        return books.map(book -> new BookResponse(book.getId(),book.getName(),
-                modelMapper.map(book.getAuthor(), AuthorResponse.class), book.getPages(),
-                book.getWrittenYear(), book.getAmount()));
+        if (books.isEmpty()){
+            throw new DataNotFoundException("Books not found!");
+        }
+
+        return books.map(bookMapper::toDto);
     }
 
 
@@ -129,7 +120,7 @@ public class BookServiceImpl implements BookService{
 
 
     @Override
-    public StandardResponse<BookResponse> update(BookDto bookDto, UUID id) {
+    public StandardResponse<BookResponseDto> update(BookDto bookDto, UUID id) {
         Optional<Book> book = bookRepository.findBookById(id);
         if (book.isEmpty()){
             throw new DataNotFoundException("Book not found!");
@@ -145,12 +136,8 @@ public class BookServiceImpl implements BookService{
         book.get().setAuthor(author.get());
         Book save = bookRepository.save(book.get());
 
-        BookResponse bookResponse = modelMapper.map(save,BookResponse.class);
+        BookResponseDto bookResponseDto = modelMapper.map(save, BookResponseDto.class);
 
-        return StandardResponse.<BookResponse>builder()
-                .status(Status.SUCCESS)
-                .message("Book updated!")
-                .data(bookResponse)
-                .build();
+        return StandardResponse.ok("Book updated!",bookResponseDto);
     }
 }

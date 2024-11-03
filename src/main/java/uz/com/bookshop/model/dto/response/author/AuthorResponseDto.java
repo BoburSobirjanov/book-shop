@@ -10,7 +10,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-public class AuthorResponse {
+public class AuthorResponseDto {
 
     private UUID id;
 

@@ -6,12 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uz.com.bookshop.exception.DataNotFoundException;
+import uz.com.bookshop.mapper.UserPurchasesMapper;
 import uz.com.bookshop.model.dto.request.userpurchases.UserPurchasesDto;
-import uz.com.bookshop.model.dto.response.book.BookResponse;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
-import uz.com.bookshop.model.dto.response.standard.Status;
-import uz.com.bookshop.model.dto.response.user.UserForFront;
-import uz.com.bookshop.model.dto.response.userpurchases.UserPurchasesResponse;
+import uz.com.bookshop.model.dto.response.userpurchases.UserPurchasesResponseDto;
 import uz.com.bookshop.model.entity.book.Book;
 import uz.com.bookshop.model.entity.price.Price;
 import uz.com.bookshop.model.entity.user.UserEntity;
@@ -38,12 +36,13 @@ public class UserPurchasesServiceImpl implements UserPurchasesService{
     private final BookRepository bookRepository;
     private final PriceRepository priceRepository;
     private final UserRepository userRepository;
+    private final UserPurchasesMapper userPurchasesMapper;
 
 
 
 
     @Override
-    public StandardResponse<UserPurchasesResponse> save(UserPurchasesDto userPurchasesDto, Principal principal) {
+    public StandardResponse<UserPurchasesResponseDto> save(UserPurchasesDto userPurchasesDto, Principal principal) {
         Optional<Book> book = bookRepository.findBookById(UUID.fromString(userPurchasesDto.getBook()));
         if (book.isEmpty()){
             throw new DataNotFoundException("Book not found!");
@@ -64,13 +63,9 @@ public class UserPurchasesServiceImpl implements UserPurchasesService{
         userPurchases.setUser(user.get());
         UserPurchases save = userPurchasesRepository.save(userPurchases);
 
-        UserPurchasesResponse userPurchasesResponse = modelMapper.map(save,UserPurchasesResponse.class);
+        UserPurchasesResponseDto userPurchasesResponseDto = modelMapper.map(save, UserPurchasesResponseDto.class);
 
-        return StandardResponse.<UserPurchasesResponse>builder()
-                .status(Status.SUCCESS)
-                .message("User purchases created!")
-                .data(userPurchasesResponse)
-                .build();
+        return StandardResponse.ok("User purchases created!",userPurchasesResponseDto);
     }
 
 
@@ -94,11 +89,7 @@ public class UserPurchasesServiceImpl implements UserPurchasesService{
 
         userPurchasesRepository.save(userPurchases.get());
 
-        return StandardResponse.<String>builder()
-                .status(Status.SUCCESS)
-                .message("User purchase deleted")
-                .data("DELETED")
-                .build();
+        return StandardResponse.ok("User purchase deleted","DELETED");
     }
 
 
@@ -107,19 +98,15 @@ public class UserPurchasesServiceImpl implements UserPurchasesService{
 
 
     @Override
-    public StandardResponse<UserPurchasesResponse> getById(UUID id) {
+    public StandardResponse<UserPurchasesResponseDto> getById(UUID id) {
 
         Optional<UserPurchases> userPurchases = userPurchasesRepository.findUserPurchasesById(id);
         if (userPurchases.isEmpty()){
             throw new DataNotFoundException("User purchases not found!");
         }
-        UserPurchasesResponse userPurchasesResponse = modelMapper.map(userPurchases,UserPurchasesResponse.class);
+        UserPurchasesResponseDto userPurchasesResponseDto = modelMapper.map(userPurchases, UserPurchasesResponseDto.class);
 
-        return StandardResponse.<UserPurchasesResponse>builder()
-                .status(Status.SUCCESS)
-                .message("User purchases created!")
-                .data(userPurchasesResponse)
-                .build();
+        return StandardResponse.ok("User purchases created!",userPurchasesResponseDto);
     }
 
 
@@ -128,7 +115,7 @@ public class UserPurchasesServiceImpl implements UserPurchasesService{
 
 
     @Override
-    public StandardResponse<UserPurchasesResponse> update(UUID id, UserPurchasesDto userPurchasesDto) {
+    public StandardResponse<UserPurchasesResponseDto> update(UUID id, UserPurchasesDto userPurchasesDto) {
         Optional<Book> book = bookRepository.findBookById(UUID.fromString(userPurchasesDto.getBook()));
         Optional<UserPurchases> userPurchases = userPurchasesRepository.findUserPurchasesById(id);
         if (userPurchases.isEmpty()){
@@ -146,13 +133,9 @@ public class UserPurchasesServiceImpl implements UserPurchasesService{
         userPurchases.get().setUser(userPurchases.get().getUser());
         UserPurchases save = userPurchasesRepository.save(userPurchases.get());
 
-        UserPurchasesResponse userPurchasesResponse = modelMapper.map(save,UserPurchasesResponse.class);
+        UserPurchasesResponseDto userPurchasesResponseDto = modelMapper.map(save, UserPurchasesResponseDto.class);
 
-        return StandardResponse.<UserPurchasesResponse>builder()
-                .status(Status.SUCCESS)
-                .message("User purchases updated!")
-                .data(userPurchasesResponse)
-                .build();
+        return StandardResponse.ok("User purchases updated!",userPurchasesResponseDto);
     }
 
 
@@ -161,12 +144,10 @@ public class UserPurchasesServiceImpl implements UserPurchasesService{
 
 
     @Override
-    public Page<UserPurchasesResponse> getAllUserPurchases(Pageable pageable) {
+    public Page<UserPurchasesResponseDto> getAllUserPurchases(Pageable pageable) {
         Page<UserPurchases> userPurchases = userPurchasesRepository.findAllUserPurchases(pageable);
 
-        return userPurchases.map(userPurchase -> new UserPurchasesResponse(userPurchase.getId(),
-                modelMapper.map(userPurchase.getUser(), UserForFront.class),
-                modelMapper.map(userPurchase.getBook(), BookResponse.class),userPurchase.getPrice()));
+        return userPurchases.map(userPurchasesMapper::toDto);
     }
 
 
@@ -175,16 +156,14 @@ public class UserPurchasesServiceImpl implements UserPurchasesService{
 
 
     @Override
-    public Page<UserPurchasesResponse> getUserIdPurchases(Pageable pageable, UUID id) {
+    public Page<UserPurchasesResponseDto> getUserIdPurchases(Pageable pageable, UUID id) {
         Optional<UserEntity> user = userRepository.findUserEntityById(id);
         if (user.isEmpty()){
             throw new DataNotFoundException("User not found!");
         }
         Page<UserPurchases> userPurchases = userPurchasesRepository.findUserPurchasesByUser(user.get(),pageable);
 
-        return userPurchases.map(userPurchase -> new UserPurchasesResponse(userPurchase.getId(),
-                modelMapper.map(userPurchase.getUser(), UserForFront.class),
-                modelMapper.map(userPurchase.getBook(), BookResponse.class),userPurchase.getPrice()));
+        return userPurchases.map(userPurchasesMapper::toDto);
     }
 
 
@@ -193,15 +172,13 @@ public class UserPurchasesServiceImpl implements UserPurchasesService{
 
 
     @Override
-    public Page<UserPurchasesResponse> getBookIdPurchases(Pageable pageable, UUID id) {
+    public Page<UserPurchasesResponseDto> getBookIdPurchases(Pageable pageable, UUID id) {
         Optional<Book> book = bookRepository.findBookById(id);
         if (book.isEmpty()){
             throw new DataNotFoundException("Book not found!");
         }
         Page<UserPurchases> userPurchases = userPurchasesRepository.findUserPurchasesByBook(book.get(),pageable);
 
-        return userPurchases.map(userPurchase -> new UserPurchasesResponse(userPurchase.getId(),
-                modelMapper.map(userPurchase.getUser(), UserForFront.class),
-                modelMapper.map(userPurchase.getBook(), BookResponse.class),userPurchase.getPrice()));
+        return userPurchases.map(userPurchasesMapper::toDto);
     }
 }
