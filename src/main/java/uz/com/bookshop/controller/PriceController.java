@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.com.bookshop.model.dto.request.price.PriceDto;
-import uz.com.bookshop.model.dto.response.price.PriceResponse;
+import uz.com.bookshop.model.dto.response.price.PriceResponseDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
 import uz.com.bookshop.service.price.PriceService;
 
@@ -28,7 +28,7 @@ public class PriceController {
 
     @PostMapping("/save")
     @PreAuthorize("hasRole('ADMIN')")
-    public StandardResponse<PriceResponse> save(
+    public StandardResponse<PriceResponseDto> save(
             @RequestBody PriceDto priceDto,
             Principal principal
             ){
@@ -51,7 +51,7 @@ public class PriceController {
 
     @GetMapping("/get-by-id/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public StandardResponse<PriceResponse> getById(
+    public StandardResponse<PriceResponseDto> getById(
             @PathVariable UUID id
     ){
         return priceService.getById(id);
@@ -62,7 +62,7 @@ public class PriceController {
 
     @GetMapping("/{id}/update")
     @PreAuthorize("hasRole('ADMIN')")
-    public StandardResponse<PriceResponse> update(
+    public StandardResponse<PriceResponseDto> update(
             @PathVariable UUID id,
             @RequestBody PriceDto priceDto
     ){
@@ -73,9 +73,9 @@ public class PriceController {
 
     @GetMapping("/get-all")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<PriceResponse> getAll(
+    public Page<PriceResponseDto> getAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "0") int size
+            @RequestParam(defaultValue = "10") int size
     ){
         Pageable pageable = PageRequest.of(page,size);
         return priceService.getAll(pageable);

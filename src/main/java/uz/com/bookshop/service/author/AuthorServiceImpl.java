@@ -6,10 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uz.com.bookshop.exception.DataNotFoundException;
+import uz.com.bookshop.mapper.AuthorMapper;
 import uz.com.bookshop.model.dto.request.author.AuthorDto;
-import uz.com.bookshop.model.dto.response.author.AuthorResponse;
+import uz.com.bookshop.model.dto.response.author.AuthorResponseDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
-import uz.com.bookshop.model.dto.response.standard.Status;
 import uz.com.bookshop.model.entity.author.Author;
 import uz.com.bookshop.model.entity.user.UserEntity;
 import uz.com.bookshop.repository.AuthorRepository;
@@ -31,6 +31,7 @@ public class AuthorServiceImpl implements AuthorService {
     private final AuthorRepository authorRepository;
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
+    private final AuthorMapper authorMapper;
 
 
 
@@ -38,19 +39,15 @@ public class AuthorServiceImpl implements AuthorService {
 
 
     @Override
-    public StandardResponse<AuthorResponse> save(AuthorDto authorDto) {
+    public StandardResponse<AuthorResponseDto> save(AuthorDto authorDto) {
         Author author = modelMapper.map(authorDto, Author.class);
         author.setFullName(authorDto.getFullName());
         author.setAddress(authorDto.getAddress());
         author.setDateOfBirth(LocalDate.parse(authorDto.getDateOfBirth(), DateTimeFormatter.ofPattern("yyyy.MM.dd")));
         Author save = authorRepository.save(author);
-        AuthorResponse authorResponse = modelMapper.map(save, AuthorResponse.class);
+        AuthorResponseDto authorResponseDto = modelMapper.map(save, AuthorResponseDto.class);
 
-        return StandardResponse.<AuthorResponse>builder()
-                .status(Status.SUCCESS)
-                .message("Author saved!")
-                .data(authorResponse)
-                .build();
+        return StandardResponse.ok("Author saved",authorResponseDto);
     }
 
 
@@ -73,11 +70,7 @@ public class AuthorServiceImpl implements AuthorService {
         author.get().setDeletedTime(LocalDateTime.now());
         authorRepository.save(author.get());
 
-        return StandardResponse.<String>builder()
-                .status(Status.SUCCESS)
-                .message("Author deleted")
-                .data("DELETED")
-                .build();
+        return StandardResponse.ok("Author deleted!","DELETED");
     }
 
 
@@ -86,18 +79,14 @@ public class AuthorServiceImpl implements AuthorService {
 
 
     @Override
-    public StandardResponse<AuthorResponse> getById(UUID id) {
+    public StandardResponse<AuthorResponseDto> getById(UUID id) {
         Optional<Author> author = authorRepository.findAuthorById(id);
         if (author.isEmpty()){
             throw new DataNotFoundException("Author not found!");
         }
-        AuthorResponse authorResponse = modelMapper.map(author, AuthorResponse.class);
+        AuthorResponseDto authorResponseDto = modelMapper.map(author, AuthorResponseDto.class);
 
-        return StandardResponse.<AuthorResponse>builder()
-                .status(Status.SUCCESS)
-                .message("This is author")
-                .data(authorResponse)
-                .build();
+        return StandardResponse.ok("This is author",authorResponseDto);
     }
 
 
@@ -106,7 +95,7 @@ public class AuthorServiceImpl implements AuthorService {
 
 
     @Override
-    public StandardResponse<AuthorResponse> update(AuthorDto authorDto, UUID id) {
+    public StandardResponse<AuthorResponseDto> update(AuthorDto authorDto, UUID id) {
         Optional<Author> author = authorRepository.findAuthorById(id);
         if (author.isEmpty()){
             throw new DataNotFoundException("Author not found!");
@@ -115,13 +104,9 @@ public class AuthorServiceImpl implements AuthorService {
         author.get().setAddress(authorDto.getAddress());
         author.get().setDateOfBirth(LocalDate.parse(authorDto.getDateOfBirth(), DateTimeFormatter.ofPattern("yyyy.MM.dd")));
         Author save = authorRepository.save(author.get());
-        AuthorResponse authorResponse = modelMapper.map(save, AuthorResponse.class);
+        AuthorResponseDto authorResponseDto = modelMapper.map(save, AuthorResponseDto.class);
 
-        return StandardResponse.<AuthorResponse>builder()
-                .status(Status.SUCCESS)
-                .message("Author updated!")
-                .data(authorResponse)
-                .build();
+        return StandardResponse.ok("Author updated!",authorResponseDto);
     }
 
 
@@ -130,10 +115,9 @@ public class AuthorServiceImpl implements AuthorService {
 
 
     @Override
-    public Page<AuthorResponse> getAll(Pageable pageable) {
+    public Page<AuthorResponseDto> getAll(Pageable pageable) {
         Page<Author> authors = authorRepository.findAllAuthors(pageable);
 
-        return authors.map(author -> new AuthorResponse(author.getId(), author.getFullName(),
-                author.getAddress(), author.getDateOfBirth()));
+        return authors.map(authorMapper::toDto);
     }
 }

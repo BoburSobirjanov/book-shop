@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.com.bookshop.model.dto.request.book.BookDto;
-import uz.com.bookshop.model.dto.response.book.BookResponse;
+import uz.com.bookshop.model.dto.response.book.BookResponseDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
 import uz.com.bookshop.service.book.BookService;
 
@@ -25,7 +25,7 @@ public class BookController {
 
     @PostMapping("/save")
     @PreAuthorize("hasRole('ADMIN')")
-    public StandardResponse<BookResponse> save(
+    public StandardResponse<BookResponseDto> save(
             @RequestBody BookDto bookDto
             ){
         return bookService.save(bookDto);
@@ -50,7 +50,7 @@ public class BookController {
 
 
     @GetMapping("/get-by-id/{id}")
-    public StandardResponse<BookResponse> getById(
+    public StandardResponse<BookResponseDto> getById(
             @PathVariable UUID id
     ){
         return bookService.getById(id);
@@ -61,7 +61,7 @@ public class BookController {
 
 
     @GetMapping("/get-all-books")
-    public Page<BookResponse> getAll(
+    public Page<BookResponseDto> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
@@ -75,7 +75,7 @@ public class BookController {
 
     @PutMapping("/{id}/update")
     @PreAuthorize("hasRole('ADMIN')")
-    public StandardResponse<BookResponse> update(
+    public StandardResponse<BookResponseDto> update(
             @RequestBody BookDto bookDto,
             @PathVariable UUID id
     ){

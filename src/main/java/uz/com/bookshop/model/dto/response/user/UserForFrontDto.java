@@ -1,8 +1,8 @@
 package uz.com.bookshop.model.dto.response.user;
 
 import lombok.*;
-import uz.com.bookshop.model.entity.user.Gender;
-import uz.com.bookshop.model.entity.user.UserRole;
+import uz.com.bookshop.model.enums.Gender;
+import uz.com.bookshop.model.enums.UserRole;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -12,7 +12,7 @@ import java.util.UUID;
 @Setter
 @Getter
 @Builder
-public class UserForFront {
+public class UserForFrontDto {
 
     private UUID id;
 

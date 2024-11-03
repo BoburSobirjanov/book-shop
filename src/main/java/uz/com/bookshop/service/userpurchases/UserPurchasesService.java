@@ -5,8 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uz.com.bookshop.model.dto.request.userpurchases.UserPurchasesDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
-import uz.com.bookshop.model.dto.response.userpurchases.UserPurchasesResponse;
-import uz.com.bookshop.model.entity.user.UserEntity;
+import uz.com.bookshop.model.dto.response.userpurchases.UserPurchasesResponseDto;
 
 import java.security.Principal;
 import java.util.UUID;
@@ -14,17 +13,17 @@ import java.util.UUID;
 @Service
 public interface UserPurchasesService {
 
-    StandardResponse<UserPurchasesResponse> save(UserPurchasesDto userPurchasesDto, Principal principal);
+    StandardResponse<UserPurchasesResponseDto> save(UserPurchasesDto userPurchasesDto, Principal principal);
 
     StandardResponse<String> delete(UUID id, Principal principal);
 
-    StandardResponse<UserPurchasesResponse> getById(UUID id);
+    StandardResponse<UserPurchasesResponseDto> getById(UUID id);
 
-    StandardResponse<UserPurchasesResponse> update(UUID id,UserPurchasesDto userPurchasesDto);
+    StandardResponse<UserPurchasesResponseDto> update(UUID id, UserPurchasesDto userPurchasesDto);
 
-    Page<UserPurchasesResponse> getAllUserPurchases(Pageable pageable);
+    Page<UserPurchasesResponseDto> getAllUserPurchases(Pageable pageable);
 
-    Page<UserPurchasesResponse> getUserIdPurchases(Pageable pageable,UUID id);
+    Page<UserPurchasesResponseDto> getUserIdPurchases(Pageable pageable, UUID id);
 
-    Page<UserPurchasesResponse> getBookIdPurchases(Pageable pageable,UUID id);
+    Page<UserPurchasesResponseDto> getBookIdPurchases(Pageable pageable, UUID id);
 }

@@ -7,12 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uz.com.bookshop.exception.DataNotFoundException;
 import uz.com.bookshop.exception.UserBadRequestException;
+import uz.com.bookshop.mapper.CommentMapper;
 import uz.com.bookshop.model.dto.request.comment.CommentDto;
-import uz.com.bookshop.model.dto.response.book.BookResponse;
-import uz.com.bookshop.model.dto.response.comment.CommentResponse;
+import uz.com.bookshop.model.dto.response.comment.CommentResponseDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
-import uz.com.bookshop.model.dto.response.standard.Status;
-import uz.com.bookshop.model.dto.response.user.UserForFront;
 import uz.com.bookshop.model.entity.book.Book;
 import uz.com.bookshop.model.entity.comment.Comments;
 import uz.com.bookshop.model.entity.user.UserEntity;
@@ -35,6 +33,7 @@ public class CommentServiceImpl implements CommentService {
     private final ModelMapper modelMapper;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final CommentMapper commentMapper;
 
 
 
@@ -42,7 +41,7 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public StandardResponse<CommentResponse> save(CommentDto commentDto, Principal principal) {
+    public StandardResponse<CommentResponseDto> save(CommentDto commentDto, Principal principal) {
         Optional<Book> book = bookRepository.findBookById(UUID.fromString(commentDto.getBookId()));
         Optional<UserEntity> user = userRepository.findUserEntityByUsername(principal.getName());
         Comments comments = modelMapper.map(commentDto,Comments.class);
@@ -56,13 +55,9 @@ public class CommentServiceImpl implements CommentService {
         comments.setBook(book.get());
         comments.setUser(user.get());
         Comments save = commentRepository.save(comments);
-        CommentResponse commentResponse = modelMapper.map(save,CommentResponse.class);
+        CommentResponseDto commentResponseDto = modelMapper.map(save, CommentResponseDto.class);
 
-        return StandardResponse.<CommentResponse>builder()
-                .status(Status.SUCCESS)
-                .message("Comment added!")
-                .data(commentResponse)
-                .build();
+        return StandardResponse.ok("Comment added",commentResponseDto);
 
     }
 
@@ -86,11 +81,7 @@ public class CommentServiceImpl implements CommentService {
         comments.get().setDeletedTime(LocalDateTime.now());
         commentRepository.save(comments.get());
 
-        return StandardResponse.<String>builder()
-                .status(Status.SUCCESS)
-                .message("Comment deleted!")
-                .data("DELETED")
-                .build();
+        return StandardResponse.ok("Comment deleted","DELETED");
     }
 
 
@@ -99,18 +90,14 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public StandardResponse<CommentResponse> getById(UUID id) {
+    public StandardResponse<CommentResponseDto> getById(UUID id) {
         Optional<Comments> comments = commentRepository.findCommentsById(id);
         if (comments.isEmpty()){
             throw new DataNotFoundException("Comment not found!");
         }
-        CommentResponse commentResponse = modelMapper.map(comments,CommentResponse.class);
+        CommentResponseDto commentResponseDto = modelMapper.map(comments, CommentResponseDto.class);
 
-        return StandardResponse.<CommentResponse>builder()
-                .status(Status.SUCCESS)
-                .message("This is comment")
-                .data(commentResponse)
-                .build();
+        return StandardResponse.ok("This is comment",commentResponseDto);
     }
 
 
@@ -119,7 +106,7 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public StandardResponse<CommentResponse> update(CommentDto commentDto, UUID id,Principal principal) {
+    public StandardResponse<CommentResponseDto> update(CommentDto commentDto, UUID id, Principal principal) {
         Optional<UserEntity> user = userRepository.findUserEntityByUsername(principal.getName());
         Optional<Comments> comments = commentRepository.findCommentsById(id);
         if (comments.isEmpty()){
@@ -129,13 +116,9 @@ public class CommentServiceImpl implements CommentService {
         comments.get().setRate(commentDto.getRate());
         comments.get().setMessage(commentDto.getMessage());
         Comments save = commentRepository.save(comments.get());
-        CommentResponse commentResponse = modelMapper.map(save,CommentResponse.class);
+        CommentResponseDto commentResponseDto = modelMapper.map(save, CommentResponseDto.class);
 
-        return StandardResponse.<CommentResponse>builder()
-                .status(Status.SUCCESS)
-                .message("Comment updated")
-                .data(commentResponse)
-                .build();
+        return StandardResponse.ok("Comment updated",commentResponseDto);
         }
         else {
             throw new UserBadRequestException("Can not update this comment!");
@@ -148,12 +131,10 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public Page<CommentResponse> getAll(Pageable pageable) {
+    public Page<CommentResponseDto> getAll(Pageable pageable) {
         Page<Comments> comments = commentRepository.findAllComments(pageable);
 
-        return comments.map(comment -> new CommentResponse(comment.getId(), comment.getMessage(),
-                comment.getRate(), modelMapper.map(comment.getBook(), BookResponse.class),
-                modelMapper.map(comment.getUser(), UserForFront.class)));
+        return comments.map(commentMapper::toDto);
     }
 
 
@@ -163,14 +144,12 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public Page<CommentResponse> getUserComments(UUID id,Pageable pageable) {
+    public Page<CommentResponseDto> getUserComments(UUID id, Pageable pageable) {
         Optional<UserEntity> user = userRepository.findUserEntityById(id);
         if (user.isEmpty()){
             throw new DataNotFoundException("User not found!");
         }
         Page<Comments> comments =  commentRepository.findAllByUser(user.get(),pageable);
-        return comments.map(comment -> new CommentResponse(comment.getId(), comment.getMessage(),
-                comment.getRate(), modelMapper.map(comment.getBook(), BookResponse.class),
-                modelMapper.map(comment.getUser(), UserForFront.class)));
+        return comments.map(commentMapper::toDto);
     }
 }

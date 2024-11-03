@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.com.bookshop.model.dto.request.author.AuthorDto;
-import uz.com.bookshop.model.dto.response.author.AuthorResponse;
+import uz.com.bookshop.model.dto.response.author.AuthorResponseDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
 import uz.com.bookshop.service.author.AuthorService;
 
@@ -26,7 +26,7 @@ public class AuthorController {
 
     @PostMapping("/save")
     @PreAuthorize("hasRole('ADMIN')")
-    public StandardResponse<AuthorResponse> save(
+    public StandardResponse<AuthorResponseDto> save(
             @RequestBody AuthorDto authorDto
             ){
         return  authorService.save(authorDto);
@@ -50,7 +50,7 @@ public class AuthorController {
 
 
     @GetMapping("/get-by-id/{id}")
-    public StandardResponse<AuthorResponse> getById(
+    public StandardResponse<AuthorResponseDto> getById(
             @PathVariable UUID id
     ){
         return authorService.getById(id);
@@ -62,7 +62,7 @@ public class AuthorController {
 
     @PutMapping("/{id}/update")
     @PreAuthorize("hasRole('ADMIN')")
-    public StandardResponse<AuthorResponse> update(
+    public StandardResponse<AuthorResponseDto> update(
             @RequestBody AuthorDto authorDto,
             @PathVariable UUID id
     ){
@@ -76,7 +76,7 @@ public class AuthorController {
 
     @GetMapping("/get-all")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<AuthorResponse> getAll(
+    public Page<AuthorResponseDto> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){

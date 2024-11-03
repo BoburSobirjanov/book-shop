@@ -1,7 +1,7 @@
 package uz.com.bookshop.model.dto.response.price;
 
 import lombok.*;
-import uz.com.bookshop.model.dto.response.book.BookResponse;
+import uz.com.bookshop.model.dto.response.book.BookResponseDto;
 
 import java.util.UUID;
 
@@ -10,11 +10,11 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-public class PriceResponse {
+public class PriceResponseDto {
 
     private UUID id;
 
     private Double price;
 
-    private BookResponse book;
+    private BookResponseDto book;
 }

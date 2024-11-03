@@ -7,7 +7,7 @@ import uz.com.bookshop.model.dto.request.user.LoginDto;
 import uz.com.bookshop.model.dto.request.user.UserDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
 import uz.com.bookshop.model.dto.response.user.JwtResponse;
-import uz.com.bookshop.model.dto.response.user.UserForFront;
+import uz.com.bookshop.model.dto.response.user.UserForFrontDto;
 
 import java.security.Principal;
 import java.util.UUID;
@@ -25,14 +25,14 @@ public interface UserService {
     StandardResponse<String> delete(UUID id, Principal principal);
 
 
-    StandardResponse<UserForFront> getById(UUID id);
+    StandardResponse<UserForFrontDto> getById(UUID id);
 
 
-    Page<UserForFront> getAllUsers(Pageable pageable);
+    Page<UserForFrontDto> getAllUsers(Pageable pageable);
 
 
-    StandardResponse<UserForFront> assignToAdmin(UUID id);
+    StandardResponse<UserForFrontDto> assignToAdmin(UUID id);
 
 
-    StandardResponse<UserForFront> update(UserDto userDto, UUID id);
+    StandardResponse<UserForFrontDto> update(UserDto userDto, UUID id);
 }

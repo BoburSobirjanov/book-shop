@@ -9,15 +9,15 @@ import org.springframework.stereotype.Service;
 import uz.com.bookshop.exception.DataNotFoundException;
 import uz.com.bookshop.exception.NotAcceptableException;
 import uz.com.bookshop.exception.UserBadRequestException;
+import uz.com.bookshop.mapper.UserMapper;
 import uz.com.bookshop.model.dto.request.user.LoginDto;
 import uz.com.bookshop.model.dto.request.user.UserDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
-import uz.com.bookshop.model.dto.response.standard.Status;
 import uz.com.bookshop.model.dto.response.user.JwtResponse;
-import uz.com.bookshop.model.dto.response.user.UserForFront;
-import uz.com.bookshop.model.entity.user.Gender;
+import uz.com.bookshop.model.dto.response.user.UserForFrontDto;
+import uz.com.bookshop.model.enums.Gender;
 import uz.com.bookshop.model.entity.user.UserEntity;
-import uz.com.bookshop.model.entity.user.UserRole;
+import uz.com.bookshop.model.enums.UserRole;
 import uz.com.bookshop.repository.UserRepository;
 import uz.com.bookshop.service.auth.JwtService;
 
@@ -38,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final UserMapper userMapper;
 
 
 
@@ -62,17 +63,13 @@ public class UserServiceImpl implements UserService {
         userRepository.save(userEntity);
         String accessToken = jwtService.generateAccessToken(userEntity);
         String refreshToken = jwtService.generateRefreshToken(userEntity);
-        UserForFront userForFront = modelMapper.map(userEntity, UserForFront.class);
+        UserForFrontDto userForFrontDto = modelMapper.map(userEntity, UserForFrontDto.class);
         JwtResponse jwtResponse = JwtResponse.builder()
-                .userForFront(userForFront)
+                .userForFrontDto(userForFrontDto)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
-        return StandardResponse.<JwtResponse>builder()
-                .data(jwtResponse)
-                .status(Status.SUCCESS)
-                .message("Sign up successfully!")
-                .build();
+        return StandardResponse.ok("Sign up successfully",jwtResponse);
     }
 
 
@@ -91,17 +88,13 @@ public class UserServiceImpl implements UserService {
         if (passwordEncoder.matches(loginDto.getPassword(), userEntity.get().getPassword())){
             String accessToken = jwtService.generateAccessToken(userEntity.get());
             String refreshToken = jwtService.generateRefreshToken(userEntity.get());
-            UserForFront userForFront =  modelMapper.map(userEntity, UserForFront.class);
+            UserForFrontDto userForFrontDto =  modelMapper.map(userEntity, UserForFrontDto.class);
             JwtResponse jwtResponse = JwtResponse.builder()
                     .refreshToken(refreshToken)
                     .accessToken(accessToken)
-                    .userForFront(userForFront)
+                    .userForFrontDto(userForFrontDto)
                     .build();
-            return StandardResponse.<JwtResponse>builder()
-                    .data(jwtResponse)
-                    .status(Status.SUCCESS)
-                    .message("Sign in successfully!")
-                    .build();
+            return StandardResponse.ok("Sign in successfully",jwtResponse);
         }
         else {
             throw new UserBadRequestException("Something error during sign in!");
@@ -129,11 +122,7 @@ public class UserServiceImpl implements UserService {
         user.get().setDeletedBy(currentUser.get().getId());
         userRepository.save(user.get());
 
-        return StandardResponse.<String>builder()
-                .status(Status.SUCCESS)
-                .message("User deleted!")
-                .data("DELETED")
-                .build();
+        return StandardResponse.ok("User deleted!","DELETED");
     }
 
 
@@ -143,18 +132,14 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public StandardResponse<UserForFront> getById(UUID id) {
+    public StandardResponse<UserForFrontDto> getById(UUID id) {
         Optional<UserEntity> user = userRepository.findUserEntityById(id);
         if (user.isEmpty()){
             throw new DataNotFoundException("User not found!");
         }
-        UserForFront userForFront = modelMapper.map(user, UserForFront.class);
+        UserForFrontDto userForFrontDto = modelMapper.map(user, UserForFrontDto.class);
 
-        return StandardResponse.<UserForFront>builder()
-                .status(Status.SUCCESS)
-                .message("This is user")
-                .data(userForFront)
-                .build();
+        return StandardResponse.ok("This is user",userForFrontDto);
     }
 
 
@@ -163,14 +148,14 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Page<UserForFront> getAllUsers(Pageable pageable) {
+    public Page<UserForFrontDto> getAllUsers(Pageable pageable) {
+
         Page<UserEntity> userEntities = userRepository.findAllUsers(pageable);
         if (userEntities.isEmpty()){
             throw new DataNotFoundException("Users not found!");
         }
-        return userEntities.map(userEntity -> new UserForFront(userEntity.getId(), userEntity.getFullName(),
-                userEntity.getAddress(), userEntity.getPhoneNumber(), userEntity.getUsername(), userEntity.getRole(),
-                userEntity.getDateOfBirth(),userEntity.getGender(),userEntity.getAge()));
+
+        return userEntities.map(userMapper::toDto);
     }
 
 
@@ -180,20 +165,16 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public StandardResponse<UserForFront> assignToAdmin(UUID id) {
+    public StandardResponse<UserForFrontDto> assignToAdmin(UUID id) {
         Optional<UserEntity> user = userRepository.findUserEntityById(id);
         if (user.isEmpty()){
             throw new DataNotFoundException("User not found!");
         }
         user.get().setRole(UserRole.ADMIN);
         UserEntity save = userRepository.save(user.get());
-        UserForFront userForFront = modelMapper.map(save, UserForFront.class);
+        UserForFrontDto userForFrontDto = modelMapper.map(save, UserForFrontDto.class);
 
-        return StandardResponse.<UserForFront>builder()
-                .status(Status.SUCCESS)
-                .message("Role changed!")
-                .data(userForFront)
-                .build();
+        return StandardResponse.ok("Role changed!",userForFrontDto);
     }
 
 
@@ -203,28 +184,24 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public StandardResponse<UserForFront> update(UserDto userDto, UUID id) {
-
+    public StandardResponse<UserForFrontDto> update(UserDto userDto, UUID id) {
         Optional<UserEntity> user = userRepository.findUserEntityById(id);
         if (user.isEmpty()){
             throw new DataNotFoundException("User not found!");
         }
-        user.get().setAddress(userDto.getAddress());
-        user.get().setRole(UserRole.USER);
-        user.get().setFullName(userDto.getFullName());
-        user.get().setUsername(userDto.getUsername());
-        user.get().setPhoneNumber(userDto.getPhoneNumber());
-        user.get().setDateOfBirth(LocalDate.parse(userDto.getDateOfBirth(), DateTimeFormatter.ofPattern("yyyy.MM.dd")));
-        user.get().setAge(Period.between(LocalDate.parse(userDto.getDateOfBirth(), DateTimeFormatter.ofPattern("yyyy.MM.dd")),LocalDate.now()).getYears());
-        UserEntity save = userRepository.save(user.get());
+        UserEntity userEntity = user.get();
+        userEntity.setAddress(userDto.getAddress());
+        userEntity.setRole(UserRole.USER);
+        userEntity.setFullName(userDto.getFullName());
+        userEntity.setUsername(userDto.getUsername());
+        userEntity.setPhoneNumber(userDto.getPhoneNumber());
+        userEntity.setDateOfBirth(LocalDate.parse(userDto.getDateOfBirth(), DateTimeFormatter.ofPattern("yyyy.MM.dd")));
+        userEntity.setAge(Period.between(LocalDate.parse(userDto.getDateOfBirth(), DateTimeFormatter.ofPattern("yyyy.MM.dd")),LocalDate.now()).getYears());
+        UserEntity save = userRepository.save(userEntity);
 
-        UserForFront userForFront = modelMapper.map(save, UserForFront.class);
+        UserForFrontDto userForFrontDto = modelMapper.map(save, UserForFrontDto.class);
 
-        return StandardResponse.<UserForFront>builder()
-                .status(Status.SUCCESS)
-                .message("User updated!")
-                .data(userForFront)
-                .build();
+        return StandardResponse.ok("User updated!",userForFrontDto);
     }
 
 

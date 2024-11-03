@@ -8,7 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.com.bookshop.model.dto.request.userpurchases.UserPurchasesDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
-import uz.com.bookshop.model.dto.response.userpurchases.UserPurchasesResponse;
+import uz.com.bookshop.model.dto.response.userpurchases.UserPurchasesResponseDto;
 import uz.com.bookshop.service.userpurchases.UserPurchasesService;
 
 import java.security.Principal;
@@ -25,7 +25,7 @@ public class UserPurchasesController {
 
 
     @PostMapping("/save")
-    public StandardResponse<UserPurchasesResponse> save(
+    public StandardResponse<UserPurchasesResponseDto> save(
             @RequestBody UserPurchasesDto userPurchasesDto,
             Principal principal
             ){
@@ -51,7 +51,7 @@ public class UserPurchasesController {
 
 
     @GetMapping("/get-by-id/{id}")
-    public StandardResponse<UserPurchasesResponse> getById(
+    public StandardResponse<UserPurchasesResponseDto> getById(
             @PathVariable UUID id
     ){
         return userPurchasesService.getById(id);
@@ -64,7 +64,7 @@ public class UserPurchasesController {
 
     @GetMapping("/get-all")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<UserPurchasesResponse> getAll(
+    public Page<UserPurchasesResponseDto> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
@@ -78,7 +78,7 @@ public class UserPurchasesController {
 
 
     @GetMapping("/{id}/get-all-userid")
-    public Page<UserPurchasesResponse> getUserIdPurchases(
+    public Page<UserPurchasesResponseDto> getUserIdPurchases(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -93,7 +93,7 @@ public class UserPurchasesController {
 
     @GetMapping("/{id}/get-all-bookid")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<UserPurchasesResponse> getBookIdPurchases(
+    public Page<UserPurchasesResponseDto> getBookIdPurchases(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -107,7 +107,7 @@ public class UserPurchasesController {
 
 
     @PutMapping("/{id}/update")
-    public StandardResponse<UserPurchasesResponse> update(
+    public StandardResponse<UserPurchasesResponseDto> update(
             @RequestBody UserPurchasesDto userPurchasesDto,
             @PathVariable UUID id
     ){

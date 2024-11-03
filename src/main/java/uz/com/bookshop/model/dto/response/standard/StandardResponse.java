@@ -14,4 +14,12 @@ public class StandardResponse <T> {
     private Status status;
 
     private T data;
+
+    public static <T> StandardResponse<T> ok(String message, T data) {
+        return StandardResponse.<T>builder()
+                .status(Status.SUCCESS)
+                .message(message)
+                .data(data)
+                .build();
+    }
 }

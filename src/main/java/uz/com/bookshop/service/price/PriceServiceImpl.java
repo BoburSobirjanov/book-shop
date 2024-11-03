@@ -6,11 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uz.com.bookshop.exception.DataNotFoundException;
+import uz.com.bookshop.mapper.PriceMapper;
 import uz.com.bookshop.model.dto.request.price.PriceDto;
-import uz.com.bookshop.model.dto.response.book.BookResponse;
-import uz.com.bookshop.model.dto.response.price.PriceResponse;
+import uz.com.bookshop.model.dto.response.price.PriceResponseDto;
 import uz.com.bookshop.model.dto.response.standard.StandardResponse;
-import uz.com.bookshop.model.dto.response.standard.Status;
 import uz.com.bookshop.model.entity.book.Book;
 import uz.com.bookshop.model.entity.price.Price;
 import uz.com.bookshop.model.entity.user.UserEntity;
@@ -33,13 +32,14 @@ public class PriceServiceImpl implements PriceService{
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final ModelMapper modelMapper;
+    private final PriceMapper priceMapper;
 
 
 
 
 
     @Override
-    public StandardResponse<PriceResponse> save(PriceDto priceDto, Principal principal) {
+    public StandardResponse<PriceResponseDto> save(PriceDto priceDto, Principal principal) {
         Optional<UserEntity> user = userRepository.findUserEntityByUsername(principal.getName());
         Optional<Book> book = bookRepository.findBookById(UUID.fromString(priceDto.getBookId()));
         Price price = modelMapper.map(priceDto, Price.class);
@@ -51,13 +51,9 @@ public class PriceServiceImpl implements PriceService{
         price.setCreatedBy(user.get().getId());
         price.setBook(book.get());
         Price save = priceRepository.save(price);
-        PriceResponse priceResponse = modelMapper.map(save,PriceResponse.class);
+        PriceResponseDto priceResponseDto = modelMapper.map(save, PriceResponseDto.class);
 
-        return StandardResponse.<PriceResponse>builder()
-                .status(Status.SUCCESS)
-                .message("Price added!")
-                .data(priceResponse)
-                .build();
+        return StandardResponse.ok("Price added",priceResponseDto);
 
     }
 
@@ -81,11 +77,7 @@ public class PriceServiceImpl implements PriceService{
         price.get().setDeletedTime(LocalDateTime.now());
         priceRepository.save(price.get());
 
-        return StandardResponse.<String>builder()
-                .status(Status.SUCCESS)
-                .message("Price deleted!")
-                .data("DELETED")
-                .build();
+        return StandardResponse.ok("Price deleted","DELETED");
     }
 
 
@@ -94,18 +86,14 @@ public class PriceServiceImpl implements PriceService{
 
 
     @Override
-    public StandardResponse<PriceResponse> getById(UUID id) {
+    public StandardResponse<PriceResponseDto> getById(UUID id) {
         Optional<Price> price = priceRepository.findPriceById(id);
         if (price.isEmpty()){
             throw new DataNotFoundException("Price not found!");
         }
-        PriceResponse priceResponse = modelMapper.map(price,PriceResponse.class);
+        PriceResponseDto priceResponseDto = modelMapper.map(price, PriceResponseDto.class);
 
-        return StandardResponse.<PriceResponse>builder()
-                .status(Status.SUCCESS)
-                .message("This is price")
-                .data(priceResponse)
-                .build();
+        return StandardResponse.ok("This is price",priceResponseDto);
     }
 
 
@@ -114,7 +102,7 @@ public class PriceServiceImpl implements PriceService{
 
 
     @Override
-    public StandardResponse<PriceResponse> update(PriceDto priceDto, UUID id) {
+    public StandardResponse<PriceResponseDto> update(PriceDto priceDto, UUID id) {
         Optional<Price> price = priceRepository.findPriceById(id);
         Optional<Book> book = bookRepository.findBookById(UUID.fromString(priceDto.getBookId()));
         if (price.isEmpty()){
@@ -128,13 +116,9 @@ public class PriceServiceImpl implements PriceService{
         price.get().setCreatedBy(price.get().getCreatedBy());
         price.get().setBook(book.get());
         Price save = priceRepository.save(price.get());
-        PriceResponse priceResponse = modelMapper.map(save,PriceResponse.class);
+        PriceResponseDto priceResponseDto = modelMapper.map(save, PriceResponseDto.class);
 
-        return StandardResponse.<PriceResponse>builder()
-                .status(Status.SUCCESS)
-                .message("Price updated!")
-                .data(priceResponse)
-                .build();
+        return StandardResponse.ok("Price updated",priceResponseDto);
     }
 
 
@@ -143,10 +127,9 @@ public class PriceServiceImpl implements PriceService{
 
 
     @Override
-    public Page<PriceResponse> getAll(Pageable pageable) {
+    public Page<PriceResponseDto> getAll(Pageable pageable) {
         Page<Price> prices = priceRepository.findAllPrice(pageable);
 
-        return prices.map(price -> new PriceResponse(price.getId(), price.getPrice(),
-                modelMapper.map(price.getBook(), BookResponse.class)));
+        return prices.map(priceMapper::toDto);
     }
 }

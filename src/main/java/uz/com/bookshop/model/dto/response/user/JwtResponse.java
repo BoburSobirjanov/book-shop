@@ -13,5 +13,5 @@ public class JwtResponse {
 
     private String refreshToken;
 
-    private UserForFront userForFront;
+    private UserForFrontDto userForFrontDto;
 }

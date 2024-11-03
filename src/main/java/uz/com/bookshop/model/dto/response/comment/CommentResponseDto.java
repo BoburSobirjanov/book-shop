@@ -1,8 +1,8 @@
 package uz.com.bookshop.model.dto.response.comment;
 
 import lombok.*;
-import uz.com.bookshop.model.dto.response.book.BookResponse;
-import uz.com.bookshop.model.dto.response.user.UserForFront;
+import uz.com.bookshop.model.dto.response.book.BookResponseDto;
+import uz.com.bookshop.model.dto.response.user.UserForFrontDto;
 
 import java.util.UUID;
 
@@ -11,7 +11,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-public class CommentResponse {
+public class CommentResponseDto {
 
     private UUID id;
 
@@ -19,7 +19,7 @@ public class CommentResponse {
 
     private Integer rate;
 
-    private BookResponse book;
+    private BookResponseDto book;
 
-    private UserForFront user;
+    private UserForFrontDto user;
 }
